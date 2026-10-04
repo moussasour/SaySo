@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="t_practice">التدريب · SaySo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css"><link rel="manifest" href="manifest.json"><link rel="icon" href="assets/icon.svg"><meta name="theme-color" content="#0A6B54">
+</head>
+<body>
+<main>
+<h1 data-i18n="h_practice">التدريب</h1>
+<div class="bar-row"><select id="cat" aria-label="الفئة" data-i18n-aria="cat_aria"></select></div>
+<div class="tabs"><button class="btn on" data-m="quiz" data-i18n="tab_quiz">اختبار</button><button class="btn" data-m="flash" data-i18n="tab_flash">بطاقات تعليمية</button><button class="btn" data-m="type" data-i18n="tab_type">كتابة</button></div>
+<div class="card" id="box" aria-live="polite"></div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/common.js"></script>
+<script>
+const {P,$,shuffle,esc,st}=App;let mode="quiz",Q,F,T;$("#cat").innerHTML=["الكل",...App.cats].map(c=>`<option value="${c}">${App.catName(c)}</option>`).join("");
+const pool=()=>P.filter(p=>$("#cat").value==="الكل"||p.category===$("#cat").value);
+function startQuiz(){const pl=pool();const a=shuffle(pl.filter(p=>!App.isLearned(p.arabic))).concat(shuffle(pl.filter(p=>App.isLearned(p.arabic)))).slice(0,10);
+const qs=a.map(p=>({p,o:shuffle([p,...shuffle(P.filter(x=>x.category===p.category&&x.english!==p.english)).concat(shuffle(P.filter(x=>x.english!==p.english))).filter((x,i,r)=>r.findIndex(y=>y.english===x.english)===i).slice(0,3)])}));Q={qs,i:0,s:0,a:0};rq()}
+function rq(){const b=$("#box");if(Q.i>=Q.qs.length){const best=Math.max(st.get("quiz-best",0),Q.s);st.set("quiz-best",best);b.innerHTML=`<div class="center"><h2> ${Q.s} / ${Q.qs.length}</h2><p class="muted">${App.t("best",best)}</p><br><button class="btn pri" id="again">${App.t("new_quiz")}</button></div>`;$("#again").onclick=startQuiz;return}
+const q=Q.qs[Q.i];b.innerHTML=`<div class="muted">${App.t("q_prog",Q.i+1,Q.qs.length,Q.s)}</div><h2 style="margin:10px 0">${App.t("q_text",`<bdi lang="ar" dir="rtl">${esc(q.p.arabic)}</bdi>`)}</h2>`+q.o.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o.english)}</button>`).join("")+`<div id="fb" style="margin-top:14px"></div>`;Q.a=0}
+function pick(k){if(Q.a)return;Q.a=1;const q=Q.qs[Q.i],ok=q.o[k]===q.p;document.querySelectorAll(".opt").forEach((b,i)=>{b.disabled=true;if(q.o[i]===q.p)b.classList.add("good");else if(i===k)b.classList.add("bad")});if(ok)Q.s++;App.setLearned(q.p,ok);App.speak(q.p.english);
+$("#fb").innerHTML=`${App.t(ok?"ok":"wrong")} — <b dir="ltr">${esc(q.p.english)}</b><br><br><button class="btn pri" id="nx">${App.t(Q.i+1<Q.qs.length?"next":"result")}</button>`;$("#nx").onclick=()=>{Q.i++;rq()}}
+function startFlash(){F={d:shuffle(pool()),i:0,f:0};rf()}
+function rf(){const b=$("#box");if(F.i>=F.d.length){b.innerHTML=`<div class="center"><h2>${App.t("flash_done")}</h2><br><button class="btn pri" id="again">${App.t("again")}</button></div>`;$("#again").onclick=startFlash;return}
+const p=F.d[F.i];b.innerHTML=`<div class="muted">${App.t("f_prog",F.i+1,F.d.length)}</div><div class="flash" id="fl" tabindex="0">${F.f?`<div class="en">${esc(p.english)}</div>`:`<span lang="ar" dir="rtl">${esc(p.arabic)}</span>`}</div><div class="acts"><button id="kn">${App.t("knew")}</button><button id="rv">${App.t("review")}</button><button id="sp">${App.t("speak")}</button></div>`;
+$("#fl").onclick=()=>{F.f=!F.f;if(F.f)App.speak(p.english);rf()};$("#sp").onclick=()=>App.speak(p.english);$("#kn").onclick=()=>{App.setLearned(p,true);F.i++;F.f=0;rf()};$("#rv").onclick=()=>{App.setLearned(p,false);F.i++;F.f=0;rf()}}
+function lev(a,b){const m=[];for(let i=0;i<=a.length;i++)m[i]=[i];for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+function startType(){T={d:shuffle(pool()).slice(0,10),i:0,s:0,a:0};rt()}
+function rt(){const b=$("#box");if(T.i>=T.d.length){b.innerHTML=`<div class="center"><h2> ${T.s} / ${T.d.length}</h2><br><button class="btn pri" id="again">${App.t("again")}</button></div>`;$("#again").onclick=startType;return}
+const p=T.d[T.i];b.innerHTML=`<div class="muted">${App.t("t_prog",T.i+1,T.d.length,T.s)}</div><h2 style="margin:10px 0">${App.t("t_text",`<bdi lang="ar" dir="rtl">${esc(p.arabic)}</bdi>`)}</h2><div class="sbox" style="margin:14px 0"><input id="ti" dir="ltr" autocomplete="off" placeholder="English..."><button class="btn pri" id="ck">${App.t("check")}</button></div><div id="fb"></div>`;const ti=$("#ti");ti.focus();
+const check=()=>{if(T.a)return;T.a=1;const u=App.norm(ti.value),c=App.norm(p.english),ok=u===c||(c.length>6&&lev(u,c)<=2);if(ok)T.s++;App.setLearned(p,ok);App.speak(p.english);$("#fb").innerHTML=`${App.t(ok?"ok":"ans")}: <b dir="ltr">${esc(p.english)}</b><br><br><button class="btn pri" id="nx">${App.t(T.i+1<T.d.length?"next":"result")}</button>`;$("#nx").onclick=()=>{T.i++;T.a=0;rt()};$("#nx").focus()};
+$("#ck").onclick=check;ti.onkeydown=e=>{if(e.key==="Enter")check()}}
+const go=()=>mode==="quiz"?startQuiz():mode==="flash"?startFlash():startType();
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.m;document.querySelectorAll(".tabs .btn").forEach(x=>x.classList.toggle("on",x===b));go()};
+$("#cat").onchange=go;$("#box").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b&&mode==="quiz")pick(+b.dataset.k)});
+document.addEventListener("keydown",e=>{if(mode==="quiz"&&Q&&/^[1-4]$/.test(e.key)&&document.querySelectorAll(".opt")[+e.key-1])pick(+e.key-1)});go();
+</script>
+</body>
+</html>

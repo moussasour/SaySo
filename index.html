@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="t_home">SaySo · تعلّم الإنجليزية من العربية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css"><link rel="manifest" href="manifest.json"><link rel="icon" href="assets/icon.svg"><meta name="theme-color" content="#0A6B54">
+</head>
+<body>
+<main>
+<section class="hero">
+<div class="eyebrow"><span>Say</span>So</div>
+<h1 data-i18n="h1_home">المثل الذي تعرفه بالعربية،<br>ومثله عند الإنجليز</h1>
+<p class="lead" id="lead"></p>
+<form class="sbox" id="f" role="search"><input id="q" placeholder="ابحث بالعربية أو الإنجليزية…" data-i18n-ph="ph_search" autocomplete="off" aria-label="بحث" data-i18n-aria="search_aria"><button class="btn pri" data-i18n="btn_search">بحث</button></form>
+<div id="daily"></div>
+<div class="stats" id="stats"></div>
+</section>
+<h2 data-i18n="h_cats">الفئات</h2><div class="grid" id="cats"></div>
+<h2 data-i18n="h_start">ابدأ من هنا</h2>
+<div class="grid2">
+<a class="card feat" href="phrases.html"><h3 data-i18n="f1_t">تصفّح SaySo</h3><p data-i18n="f1_p">بحث يتجاهل التشكيل بالعربية والإنجليزية، مع نطق ونسخ بضغطة.</p></a>
+<a class="card feat" href="practice.html"><h3 data-i18n="f2_t">تدريب</h3><p data-i18n="f2_p">اختبار نظير المثل، بطاقات تعليمية، وتمرين كتابة.</p></a>
+<a class="card feat" href="favorites.html"><h3 data-i18n="f3_t">محفوظاتي</h3><p data-i18n="f3_p">مفضلتك وتقدّمك وسلسلة أيامك، مع إمكانية التصدير.</p></a>
+</div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/common.js"></script>
+<script>
+const {P,cats,icons,$}=App;
+$("#lead").textContent=App.t("lead",P.length,cats.length);
+$("#f").onsubmit=e=>{e.preventDefault();location.href="phrases.html?q="+encodeURIComponent($("#q").value)};
+$("#cats").innerHTML=cats.map(c=>`<a class="cat" href="phrases.html?c=${encodeURIComponent(c)}"><i>${icons[c]||"📌"}</i><b>${App.catName(c)}</b><small>${App.t("n_proverbs",P.filter(p=>p.category===c).length)}</small></a>`).join("");
+const daily=P[(Math.floor(Date.now()/864e5)*7919)%P.length];
+function render(){$("#daily").innerHTML=App.spread(daily);
+$("#stats").innerHTML=[[P.length,App.t("st_proverbs")],[cats.length,App.t("st_cats")],[App.learned.size,App.t("st_learned")],[App.streak(),App.t("st_streak")]].map(c=>`<div class="stat"><b>${c[0]}</b><span>${c[1]}</span></div>`).join("")}
+render();document.addEventListener("app:change",render);
+</script>
+</body>
+</html>
